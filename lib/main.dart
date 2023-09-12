@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,6 +33,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<(DateTime, String)> _histories = [];
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +55,15 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           TextField(
-            onChanged: (value) {
+            controller: _controller,
+            onChanged: (value) async {
+              // iOS CJK input issue workaround
+              // https://github.com/flutter/flutter/issues/50163#issuecomment-1299682180
+              if (Platform.isIOS) {
+                await Future.delayed(const Duration(milliseconds: 10));
+                if (value != _controller.text) return;
+              }
+
               setState(() {
                 _histories.add((DateTime.now(), value));
               });
